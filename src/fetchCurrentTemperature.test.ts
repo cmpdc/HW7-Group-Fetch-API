@@ -13,4 +13,17 @@ describe("fetchCurrentTemperature", () => {
             assert(result.temperature_2m.every(x => typeof x === "number")); // Assert each element in that time is a number
         });
     });
+
+    it("Promise rejects when given wrong latitude and longitude numbers", () => {
+        return expect(fetchCurrentTemperature({lat:100, lon: 200})).rejects.toThrow();
+    });
+
+    it("returns the right array length", () => {
+        const promise = fetchCurrentTemperature({ lat: 0, lon: 0 });
+
+        return promise.then(result => {
+            assert (result.time.length === result.temperature_2m.length); //check array length
+        });
+    });
+       
 });
