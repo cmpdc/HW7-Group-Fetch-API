@@ -1,3 +1,5 @@
+// Christian Dela Cruz
+
 import fetch from "../include/fetch.js";
 
 interface APIResponse {

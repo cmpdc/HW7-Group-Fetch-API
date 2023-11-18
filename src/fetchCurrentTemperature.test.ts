@@ -1,3 +1,5 @@
+// Cyrine Ben Ayed
+
 import assert from "assert";
 import { fetchCurrentTemperature } from "./fetchCurrentTemperature.js";
 

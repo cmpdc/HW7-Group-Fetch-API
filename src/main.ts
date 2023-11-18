@@ -10,18 +10,15 @@ const randomCollegeSearch = (universityQuery: string): Promise<string[]> => {
         console.log(`\n${universityQuery} search:`);
         return res;
     });
-}
+};
 
 const collegeName = `University of Texas`;
 
 randomCollegeSearch(collegeName).then(console.log)
 
-fetchUniversityWeather(collegeName).then(console.log);
-
-fetchGeoCoord(collegeName).then(console.log)
+fetchUniversityWeather(collegeName, (name: string): string => name.replace(` at `, ` `)).then(console.log);
 
 // randomCollegeSearch("University of Texas").then(console.log);
 // randomCollegeSearch("test").then(console.log).catch(error => console.error("Expected", error));
-
 
 // fetchGeoCoord("University of Texas Medical").then(console.log)

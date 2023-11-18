@@ -14,8 +14,8 @@ export function fetchUniversityWeather(
     return fetchUniversities(universityQuery).then(universityNames => {
         if (universityNames.length === 0) throw new Error("No results found for query.");
         const transformedNames = transformName ? universityNames.map(transformName) : universityNames;
-        
-        const geoCoordPromises = transformedNames.map(name => 
+
+        const geoCoordPromises = transformedNames.map(name =>
             fetchGeoCoord(name).then(coord => ({ name, coord })).catch(error => {
                 console.error(error, `\nFailed to fetch GeoCoord for ${name}.\n`);
                 return null;
@@ -27,7 +27,7 @@ export function fetchUniversityWeather(
 
             if (validResults.length === 0) throw new Error("No valid geocoordinates found for the universities.");
 
-            const temperaturePromises = validResults.map(({ name, coord }) => 
+            const temperaturePromises = validResults.map(({ name, coord }) =>
                 fetchCurrentTemperature(coord).then(temperature => {
                     const averageTemp = temperature.temperature_2m.reduce((a, b) => a + b, 0) / temperature.temperature_2m.length;
                     return { name, averageTemp };
