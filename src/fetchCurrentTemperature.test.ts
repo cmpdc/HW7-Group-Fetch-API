@@ -3,7 +3,7 @@
 import assert from "assert";
 import { fetchCurrentTemperature } from "./fetchCurrentTemperature.js";
 
-describe.skip("fetchCurrentTemperature", () => {
+describe("fetchCurrentTemperature", () => {
     it("follows type specification", () => {
         const promise = fetchCurrentTemperature({ lat: -71.05, lon: 90 });
 

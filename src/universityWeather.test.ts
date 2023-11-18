@@ -60,7 +60,7 @@ describe("fetchUniversityWeather", () => {
     });
 });
 
-describe.skip("fetchUCalWeather", () => {
+describe("fetchUCalWeather", () => {
     it("follows type specification", () => {
         const promise = fetchUCalWeather();
 
@@ -78,7 +78,7 @@ describe.skip("fetchUCalWeather", () => {
     });
 });
 
-describe.skip("fetchUMassWeather", () => {
+describe("fetchUMassWeather", () => {
     it("follows type specification", () => {
         const promise = fetchUMassWeather();
 
