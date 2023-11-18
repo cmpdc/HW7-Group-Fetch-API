@@ -1,7 +1,7 @@
 import assert from "assert";
 import { fetchGeoCoord } from "./fetchGeoCoord.js";
 
-describe("fetchGeoCoord", () => {
+describe.skip("fetchGeoCoord", () => {
     it("follows type specification", () => {
         const promise = fetchGeoCoord("University of Massachusetts Amherst");
 

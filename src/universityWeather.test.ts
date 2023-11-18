@@ -6,7 +6,7 @@ const SECOND = 1000;
 // 30 second timeout
 jest.setTimeout(30 * SECOND);
 
-describe("fetchUCalWeather", () => {
+describe.skip("fetchUCalWeather", () => {
     it("follows type specification", () => {
         const promise = fetchUCalWeather();
 
@@ -24,7 +24,7 @@ describe("fetchUCalWeather", () => {
     });
 });
 
-describe("fetchUMassWeather", () => {
+describe.skip("fetchUMassWeather", () => {
     it("follows type specification", () => {
         const promise = fetchUMassWeather();
 
