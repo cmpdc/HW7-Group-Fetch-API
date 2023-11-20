@@ -1,4 +1,6 @@
 import fetch from "../include/fetch.js";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
 /* 
 authorInfo takes in an author name and gets the data from the link.
@@ -60,7 +62,7 @@ export function authorInfo(name: string) {
     const baseURL = "https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org";
     const apiURL = `${baseURL}/search/authors.json?q=${encodeURIComponent(authorName)}`;
 
-    fetch(apiURL)
+    return fetch(apiURL)
         .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
         .then((response: author) => {
             return response.numFoundExact && Array.isArray(response.docs) && response.docs.length > 0
@@ -76,7 +78,7 @@ export function authorInfo(name: string) {
 export function authorWorks(authorID: string, numWorks: number) {
     const apiURL = `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(authorID)}/works.json?limit=${encodeURIComponent(numWorks)}`;
 
-    fetch(apiURL)
+    return fetch(apiURL)
         .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
         .then(response => {
             console.log("Author Works:");
@@ -87,5 +89,36 @@ export function authorWorks(authorID: string, numWorks: number) {
 
 }
 
-authorInfo("J K Rowling");
-authorWorks("OL23919A", 10);
+(async function main() {
+    const rl = createInterface({ input, output });
+
+    try {
+        let continueRunning = true;
+
+        while (continueRunning) {
+            const authorName = await rl.question(`\nEnter the name of a book author: `);
+            await authorInfo(authorName);
+
+            // Block; ask for confirmation before moving to the next one...
+            const answer = await rl.question(`\nDo you want to try the next one? (Y/N): `);
+            continueRunning = answer.toUpperCase() === `Y`;
+            
+            if (continueRunning) {
+                const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
+                const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
+                await authorWorks(authorID, parseInt(numWorks, 10));
+                
+                const next = await rl.question('Do you want to continue and try again? (Y/N): ');
+                continueRunning = next.toUpperCase() === `Y`;
+            }
+        }
+    } catch (error) {
+        
+    } finally {
+        rl.close();
+    }
+})();
+
+// authorInfo("J K Rowling");
+// authorWorks("OL23919A", 10);
+
