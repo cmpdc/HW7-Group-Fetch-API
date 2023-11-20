@@ -91,25 +91,39 @@ export function authorWorks(authorID: string, numWorks: number) {
 
 (async function main() {
     const rl = createInterface({ input, output });
+    const confirmText = "(Y to coninue/Any other keys to exit): ";
 
     try {
         let continueRunning = true;
 
         while (continueRunning) {
-            const authorName = await rl.question(`\nEnter the name of a book author: `);
+            console.log(`Humor me...`);
+            const authorName = await rl.question(`\nEnter a name of an author: `);
             await authorInfo(authorName);
 
             // Block; ask for confirmation before moving to the next one...
-            const answer = await rl.question(`\nDo you want to try the next one? (Y/N): `);
-            continueRunning = answer.toUpperCase() === `Y`;
+            console.log(`\nDo you want to try the next one? `)
+            const answer = await rl.question(confirmText);
+            if (answer.toUpperCase() === `Y`) {
+                continueRunning = true;
+            } else {
+                continueRunning = false;
+                console.log(`You entered "${answer}". Exiting...`);
+            }
             
             if (continueRunning) {
                 const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
                 const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
                 await authorWorks(authorID, parseInt(numWorks, 10));
                 
-                const next = await rl.question('Do you want to continue and try again? (Y/N): ');
-                continueRunning = next.toUpperCase() === `Y`;
+                console.log("\nDo you want to continue and try again?");
+                const next = await rl.question(confirmText);
+                if (next.toUpperCase() === `Y`) {
+                    continueRunning = true;
+                } else {
+                    continueRunning = false;
+                    console.log(`You entered "${next}". Exiting...`);
+                }
             }
         }
     } catch (error) {
