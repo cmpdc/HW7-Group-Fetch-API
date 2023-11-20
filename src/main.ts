@@ -75,7 +75,6 @@ export function authorInfo(name: string) {
 
 export function authorWorks(authorID: string, numWorks: number) {
     const apiURL = `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(authorID)}/works.json?limit=${encodeURIComponent(numWorks)}`;
-    console.log(apiURL);
 
     fetch(apiURL)
         .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
