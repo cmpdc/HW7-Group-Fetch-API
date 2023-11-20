@@ -80,11 +80,13 @@ export function authorWorks(authorID: string, numWorks: number) {
     return fetch(apiURL)
         .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
         .then(response => {
-            console.log("Author Works:");
-            const works: string[] = [];
-            response.entries.forEach((bk: Book) => works.push(bk.title));
-            console.log(works);
-        });
+            console.log(`\nAuthor Works (${response.entries.length} results):`);
+            response.entries.forEach((bk: Book, index: number) => {
+                const formattedIndex = index < 9 ? `0${index + 1}` : `${index + 1}`;
+                console.log(`${formattedIndex}) "${bk.title}"`);
+            });
+        })
+        .catch(error => console.log("Error fetching author works", error));
 
 }
 
@@ -109,19 +111,39 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
 
         while (continueRunning) {
             console.log(`Humor me...`);
-            const authorName = await rl.question(`\nEnter a name of an author: `);
-            await authorInfo(authorName);
 
-            // Block; ask for confirmation before moving to the next one...
-            continueRunning = await confirmContinue(rl, `\nDo you want to try the next one?`);
-            
-            if (continueRunning) {
-                const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
-                const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
-                await authorWorks(authorID, parseInt(numWorks, 10));
-                
-                continueRunning = await confirmContinue(rl, `\nDo you want to continue and try again?`);
+            let authorName;
+            let authorNameSuccess = false;
+
+            while (!authorNameSuccess) {
+                try {
+                    authorName = await rl.question(`\nEnter a name of an author: `);
+                    await authorInfo(authorName);
+                    authorNameSuccess = true;
+                } catch (error) {
+                    console.error(`An error occurred:`, error);
+                    console.log(`Please try again.`);
+                }
             }
+
+            let authorID, numWorks;
+            let authorWorksSuccess = false;
+
+            // ask for confirmation before moving to the next one...
+            while (!authorWorksSuccess && await confirmContinue(rl, `\nDo you want to try the next one?`)) {
+                try {
+                    authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
+                    numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
+                    await authorWorks(authorID, parseInt(numWorks, 10));
+                    authorWorksSuccess = true;
+
+                } catch (error) {
+                    console.error('An error occurred:', error);
+                    console.log('Please try again.');
+                }
+            }
+
+            continueRunning = await confirmContinue(rl, `\nDo you want to continue and try again?`);
         }
     } catch (error) {
         
