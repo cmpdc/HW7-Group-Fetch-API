@@ -56,7 +56,6 @@ interface Book {
     };
 }
 
-
 export function authorInfo(name: string) {
     const authorName = name.replace(". ", " ");
     const baseURL = "https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org";
@@ -89,9 +88,21 @@ export function authorWorks(authorID: string, numWorks: number) {
 
 }
 
+async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
+    const confirmText = "(Y to continue/Any other key to exit): ";
+    console.log(`\n${prompt}`);
+    
+    const answer = await rl.question(confirmText);
+    if (answer.toUpperCase() === `Y`) {
+        return true;
+    } else {
+        console.log(`You entered "${answer}". Exiting...`);
+        return false;
+    }
+}
+
 (async function main() {
     const rl = createInterface({ input, output });
-    const confirmText = "(Y to coninue/Any other keys to exit): ";
 
     try {
         let continueRunning = true;
@@ -102,28 +113,14 @@ export function authorWorks(authorID: string, numWorks: number) {
             await authorInfo(authorName);
 
             // Block; ask for confirmation before moving to the next one...
-            console.log(`\nDo you want to try the next one? `)
-            const answer = await rl.question(confirmText);
-            if (answer.toUpperCase() === `Y`) {
-                continueRunning = true;
-            } else {
-                continueRunning = false;
-                console.log(`You entered "${answer}". Exiting...`);
-            }
+            continueRunning = await confirmContinue(rl, `\nDo you want to try the next one?`);
             
             if (continueRunning) {
                 const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
                 const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
                 await authorWorks(authorID, parseInt(numWorks, 10));
                 
-                console.log("\nDo you want to continue and try again?");
-                const next = await rl.question(confirmText);
-                if (next.toUpperCase() === `Y`) {
-                    continueRunning = true;
-                } else {
-                    continueRunning = false;
-                    console.log(`You entered "${next}". Exiting...`);
-                }
+                continueRunning = await confirmContinue(rl, `\nDo you want to continue and try again?`);
             }
         }
     } catch (error) {
