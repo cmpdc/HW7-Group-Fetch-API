@@ -37,7 +37,7 @@ describe("fetchUniversities", () => {
             `University of California, Santa Barbara`,
             `University of California, San Diego`,
             `University of California, San Francisco`,
-            `University of California, Riverside`
+            `University of California, Riverside`,
         ].map(name => ({ name }));
 
         (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -47,7 +47,6 @@ describe("fetchUniversities", () => {
 
         const promise = await fetchUniversities("University of California");
         return expect(promise).toEqual(mockUniversities.map(u => u.name));
-
     });
 
     it(`fetchUniversities returns expected results for "University of"`, async () => {

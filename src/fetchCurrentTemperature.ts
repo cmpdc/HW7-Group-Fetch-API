@@ -31,14 +31,17 @@ export function fetchCurrentTemperature(coords: GeoCoord): Promise<TemperatureRe
     const apiURL = `${baseURL}/currentTemperature/forecast?latitude=${coords.lat}&longitude=${coords.lon}&hourly=${hourlyParamVal}&temperature_unit=${tempUnitParamVal}`;
 
     return new Promise((resolve, reject) => {
-        fetch(apiURL).then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json() as Promise<APIResponse>;
-        }).then((results: APIResponse) => {
-            resolve({
-                time: results.hourly.time.map(v => String(v)),
-                temperature_2m: results.hourly.temperature_2m.map(v => Number(v))
-            });
-        }).catch(error => reject(error));
+        fetch(apiURL)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json() as Promise<APIResponse>;
+            })
+            .then((results: APIResponse) => {
+                resolve({
+                    time: results.hourly.time.map(v => String(v)),
+                    temperature_2m: results.hourly.temperature_2m.map(v => Number(v)),
+                });
+            })
+            .catch(error => reject(error));
     });
 }

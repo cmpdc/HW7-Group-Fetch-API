@@ -16,14 +16,16 @@ export function fetchUniversityWeather(
         const transformedNames = transformName ? universityNames.map(transformName) : universityNames;
 
         const geoCoordPromises = transformedNames.map(name =>
-            fetchGeoCoord(name).then(coord => ({ name, coord })).catch(error => {
-                console.error(error, `\nFailed to fetch GeoCoord for ${name}.\n`);
-                return null;
-            })
+            fetchGeoCoord(name)
+                .then(coord => ({ name, coord }))
+                .catch(error => {
+                    console.error(error, `\nFailed to fetch GeoCoord for ${name}.\n`);
+                    return null;
+                })
         );
 
         return Promise.all(geoCoordPromises).then(results => {
-            const validResults = results.filter(result => result !== null) as { name: string, coord: GeoCoord }[];
+            const validResults = results.filter(result => result !== null) as { name: string; coord: GeoCoord }[];
 
             if (validResults.length === 0) throw new Error("No valid geocoordinates found for the universities.");
 
@@ -45,7 +47,7 @@ export function fetchUniversityWeather(
                 return results;
             });
         });
-    })
+    });
 }
 
 export function fetchUMassWeather(): Promise<AverageTemperatureResults> {

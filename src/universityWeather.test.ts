@@ -45,7 +45,7 @@ describe("fetchUniversityWeather", () => {
             "University of Texas at Dallas",
             "University of Texas at Tyler",
             "University of Texas at El Paso",
-            "University of Texas at Arlington"
+            "University of Texas at Arlington",
         ]);
 
         const isSetsEqual = (a: Set<string>, b: Set<string>) => {

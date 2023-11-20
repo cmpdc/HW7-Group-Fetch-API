@@ -16,12 +16,15 @@ export function fetchUniversities(query: string): Promise<string[]> {
     const apiURL = `${baseURL}/universities/search?name=${encodeURIComponent(query)}`;
 
     return new Promise((resolve, reject) => {
-        fetch(apiURL).then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        }).then((universities: APIResponse[]) => {
-            const universityNames: string[] = universities.map(u => u.name);
-            resolve(universityNames);
-        }).catch(error => reject(error));
+        fetch(apiURL)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then((universities: APIResponse[]) => {
+                const universityNames: string[] = universities.map(u => u.name);
+                resolve(universityNames);
+            })
+            .catch(error => reject(error));
     });
 }
