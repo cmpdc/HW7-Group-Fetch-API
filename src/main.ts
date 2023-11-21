@@ -10,7 +10,7 @@ Also using the author id we can get the works of the author
 This is what authorWorks does.
 */
 
-interface docs {
+interface DOCS {
     key: string;
     type: string;
     name: string;
@@ -22,11 +22,11 @@ interface docs {
     version: string;
 }
 
-interface author {
+interface Author {
     numFound: number;
     start: number;
     numFoundExact: boolean;
-    docs: docs[]
+    docs: DOCS[];
 }
 
 interface Book {
@@ -62,29 +62,36 @@ export async function authorInfo(name: string): Promise<boolean> {
     const apiURL = `${baseURL}/search/authors.json?q=${encodeURIComponent(authorName)}`;
 
     return fetch(apiURL)
-        .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
-        .then((response: author) => {
+        .then(result => (result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`))))
+        .then((response: Author) => {
             return response.numFoundExact && Array.isArray(response.docs) && response.docs.length > 0
                 ? Promise.resolve(response.docs[0].key)
                 : Promise.reject(new Error("No results found for the given author."));
         })
-        .then((Id: string) => { console.log("Author's ID: ", Id); return fetch(`https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(Id)}.json`) })
-        .then(res => res.ok ? res.json() : Promise.reject(new Error(`Error in response: ${res.statusText}`)))
+        .then((Id: string) => {
+            console.log("Author's ID: ", Id);
+            return fetch(
+                `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(Id)}.json`
+            );
+        })
+        .then(res => (res.ok ? res.json() : Promise.reject(new Error(`Error in response: ${res.statusText}`))))
         .then(info => {
-            console.log("Author's information: ", info.bio)
+            console.log("Author's information: ", info.bio);
             return true;
         })
         .catch(error => {
-            console.log("Invalid", error)
+            console.log("Invalid", error);
             return false;
         });
 }
 
 export async function authorWorks(authorID: string, numWorks: number): Promise<boolean> {
-    const apiURL = `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(authorID)}/works.json?limit=${encodeURIComponent(numWorks)}`;
+    const apiURL = `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(
+        authorID
+    )}/works.json?limit=${encodeURIComponent(numWorks)}`;
 
     return fetch(apiURL)
-        .then(result => result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`)))
+        .then(result => (result.ok ? result.json() : Promise.reject(new Error(`Error in response: ${result.statusText}`))))
         .then(response => {
             console.log(`\nAuthor Works (${response.entries.length} results):`);
             response.entries.forEach((bk: Book, index: number) => {
@@ -96,10 +103,9 @@ export async function authorWorks(authorID: string, numWorks: number): Promise<b
         })
         .catch(error => {
             console.log("Error fetching author works", error);
-            
+
             return false;
         });
-
 }
 
 async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
@@ -119,12 +125,11 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
     const rl = createInterface({ input, output });
     const tryAgainPrompt = "Please try again.";
 
+    console.log(`Humor me...`);
     try {
         let continueRunning = true;
 
         while (continueRunning) {
-            console.log(`Humor me...`);
-
             let authorInfoSuccess = false;
             while (!authorInfoSuccess) {
                 const authorName = await rl.question(`\nEnter a name of an author: `);
@@ -136,7 +141,9 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
             if (authorInfoSuccess) {
                 let authorWorksSuccess = false;
 
-                while (!authorWorksSuccess && await confirmContinue(rl, `\nDo you want to try the next one?`)) {
+                const enterSecondQuestion = await confirmContinue(rl, `\nDo you want to try the next one?`);
+
+                while (!authorWorksSuccess && enterSecondQuestion) {
                     const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
                     const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
                     authorWorksSuccess = await authorWorks(authorID, parseInt(numWorks, 10));
@@ -148,7 +155,7 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
             continueRunning = await confirmContinue(rl, `\nDo you want to continue and try again?`);
         }
     } catch (error) {
-
+        console.log("Program error: ", error);
     } finally {
         rl.close();
     }
@@ -156,4 +163,3 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
 
 // authorInfo("J K Rowling");
 // authorWorks("OL23919A", 10);
-
