@@ -56,7 +56,7 @@ interface Book {
     };
 }
 
-export function authorInfo(name: string) {
+export async function authorInfo(name: string): Promise<boolean> {
     const authorName = name.replace(". ", " ");
     const baseURL = "https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org";
     const apiURL = `${baseURL}/search/authors.json?q=${encodeURIComponent(authorName)}`;
@@ -70,11 +70,17 @@ export function authorInfo(name: string) {
         })
         .then((Id: string) => { console.log("Author's ID: ", Id); return fetch(`https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(Id)}.json`) })
         .then(res => res.ok ? res.json() : Promise.reject(new Error(`Error in response: ${res.statusText}`)))
-        .then(info => console.log("Author's information: ", info.bio))
-        .catch(error => console.log("Invalid", error));
+        .then(info => {
+            console.log("Author's information: ", info.bio)
+            return true;
+        })
+        .catch(error => {
+            console.log("Invalid", error)
+            return false;
+        });
 }
 
-export function authorWorks(authorID: string, numWorks: number) {
+export async function authorWorks(authorID: string, numWorks: number): Promise<boolean> {
     const apiURL = `https://220.maxkuechen.com/fetch/noCache/?url=https://openlibrary.org/authors/${encodeURIComponent(authorID)}/works.json?limit=${encodeURIComponent(numWorks)}`;
 
     return fetch(apiURL)
@@ -85,15 +91,21 @@ export function authorWorks(authorID: string, numWorks: number) {
                 const formattedIndex = index < 9 ? `0${index + 1}` : `${index + 1}`;
                 console.log(`${formattedIndex}) "${bk.title}"`);
             });
+
+            return true;
         })
-        .catch(error => console.log("Error fetching author works", error));
+        .catch(error => {
+            console.log("Error fetching author works", error);
+            
+            return false;
+        });
 
 }
 
 async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
     const confirmText = "(Y to continue/Any other key to exit): ";
     console.log(`\n${prompt}`);
-    
+
     const answer = await rl.question(confirmText);
     if (answer.toUpperCase() === `Y`) {
         return true;
@@ -105,6 +117,7 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
 
 (async function main() {
     const rl = createInterface({ input, output });
+    const tryAgainPrompt = "Please try again.";
 
     try {
         let continueRunning = true;
@@ -112,41 +125,30 @@ async function confirmContinue(rl: any, prompt: string): Promise<boolean> {
         while (continueRunning) {
             console.log(`Humor me...`);
 
-            let authorName;
-            let authorNameSuccess = false;
+            let authorInfoSuccess = false;
+            while (!authorInfoSuccess) {
+                const authorName = await rl.question(`\nEnter a name of an author: `);
+                authorInfoSuccess = await authorInfo(authorName);
 
-            while (!authorNameSuccess) {
-                try {
-                    authorName = await rl.question(`\nEnter a name of an author: `);
-                    await authorInfo(authorName);
-                    authorNameSuccess = true;
-                } catch (error) {
-                    console.error(`An error occurred:`, error);
-                    console.log(`Please try again.`);
-                }
+                if (!authorInfoSuccess) console.log(tryAgainPrompt);
             }
 
-            let authorID, numWorks;
-            let authorWorksSuccess = false;
+            if (authorInfoSuccess) {
+                let authorWorksSuccess = false;
 
-            // ask for confirmation before moving to the next one...
-            while (!authorWorksSuccess && await confirmContinue(rl, `\nDo you want to try the next one?`)) {
-                try {
-                    authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
-                    numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
-                    await authorWorks(authorID, parseInt(numWorks, 10));
-                    authorWorksSuccess = true;
+                while (!authorWorksSuccess && await confirmContinue(rl, `\nDo you want to try the next one?`)) {
+                    const authorID = await rl.question(`\nEnter the author ID (provided from the result above): `);
+                    const numWorks = await rl.question(`Enter the number of works to fetch (try 10): `);
+                    authorWorksSuccess = await authorWorks(authorID, parseInt(numWorks, 10));
 
-                } catch (error) {
-                    console.error('An error occurred:', error);
-                    console.log('Please try again.');
+                    if (!authorWorksSuccess) console.log(tryAgainPrompt);
                 }
             }
 
             continueRunning = await confirmContinue(rl, `\nDo you want to continue and try again?`);
         }
     } catch (error) {
-        
+
     } finally {
         rl.close();
     }
